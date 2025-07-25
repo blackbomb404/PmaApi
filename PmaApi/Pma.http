@@ -1,0 +1,6 @@
+@Pma_HostAddress = http://localhost:5255
+
+GET {{Pma_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
