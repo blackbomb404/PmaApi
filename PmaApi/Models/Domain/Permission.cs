@@ -1,10 +1,14 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PmaApi.Models.Domain;
 
-public class Permission
+[Table("permissions")]
+public class Permission : BaseEntity<long>
 {
-    public long Id { get; set; }
     [StringLength(30)]
-    public required string Name { get; set; } 
+    public required string Name { get; set; }
+    [StringLength(100)]
+    public string? Description { get; set; }
+    public ICollection<Role> Roles { get; set; } = new List<Role>();
 }

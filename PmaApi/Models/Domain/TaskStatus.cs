@@ -1,10 +1,14 @@
-using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace PmaApi.Models.Domain;
 
-public class TaskStatus
+public enum TaskStatus
 {
-    public long Id { get; set; }
-    [StringLength(30)]
-    public required string Name { get; set; } // Not Started, In Progress, Completed
+    Created,
+    Assigned,
+    InProgress,
+    OnHold,
+    Cancelled,
+    WaitingForAproval,
+    Completed
 }
