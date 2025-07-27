@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PmaApi.Models.Domain;
 
-[Table("roles")]
 public class Role : BaseEntity<long>
 {
     [StringLength(30)]

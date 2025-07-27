@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PmaApi.Models.Domain;
 
-[Table("comments")]
 public class Comment : BaseEntity<long>
 {
     [StringLength(100)]

@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PmaApi.Models.Domain;
 
-[Table("attachments")]
 public class Attachment : BaseEntity<long>
 {
     public long AttachableEntityId { get; set; }

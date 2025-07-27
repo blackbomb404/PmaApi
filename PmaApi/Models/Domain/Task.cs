@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PmaApi.Models.Domain;
 
-[Table("tasks")]
 public class Task : AttachableEntity<long>
 {
     public int Order { get; set; }

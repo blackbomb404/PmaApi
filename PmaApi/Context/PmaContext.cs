@@ -19,8 +19,7 @@ public class PmaContext : DbContext
         
         // Configure the inheritance hierarchy for AttachableEntity
         modelBuilder.Entity<AttachableEntity<long>>()
-            .ToTable("attachable_entities")
-            .UseTphMappingStrategy();
+            .UseTpcMappingStrategy();
 
         modelBuilder.Entity<User>()
             .HasMany(u => u.Projects)
@@ -83,7 +82,13 @@ public class PmaContext : DbContext
             .HasForeignKey(a => a.UserId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.SetNull);
+        
         // Add the unique contraints and others (if needed)
-            
+        modelBuilder.Entity<Role>()
+            .HasIndex(r => r.Name)
+            .IsUnique();
+        modelBuilder.Entity<Permission>()
+            .HasIndex(p => p.Name)
+            .IsUnique();
     }
 }

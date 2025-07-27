@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PmaApi.Models.Domain;
 
-[Table("permissions")]
 public class Permission : BaseEntity<long>
 {
     [StringLength(30)]

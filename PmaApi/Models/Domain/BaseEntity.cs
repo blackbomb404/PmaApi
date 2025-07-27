@@ -2,8 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PmaApi.Models.Domain;
 
-[Table("base_entities")]
-public abstract class BaseEntity<T>
+public  class BaseEntity<T>
 {
     public T Id { get; init; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
