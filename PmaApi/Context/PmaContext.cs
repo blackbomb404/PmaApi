@@ -19,7 +19,7 @@ public class PmaContext : DbContext
         
         // Configure the inheritance hierarchy for AttachableEntity
         modelBuilder.Entity<AttachableEntity<long>>()
-            .UseTpcMappingStrategy();
+            .UseTphMappingStrategy();
 
         modelBuilder.Entity<User>()
             .HasMany(u => u.Projects)
