@@ -20,7 +20,7 @@ public class User : BaseEntity
     public long JobRoleId { get; set; }
     public JobRole JobRole { get; set; }
     
-    public long RoleId { get; set; }
+    public long AccessRoleId { get; set; }
     public AccessRole AccessRole { get; set; }
     
     public ICollection<Project> Projects = new List<Project>();

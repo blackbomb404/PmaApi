@@ -4,21 +4,23 @@ using Task = PmaApi.Models.Domain.Task;
 
 namespace Pma.Context;
 
-public class PmaContext : DbContext
+public class PmaContext(DbContextOptions<PmaContext> options) : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
+    public DbSet<JobRole> JobRoles { get; set; }
     public DbSet<AccessRole> Roles { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<Project> Projects { get; set; }
     public DbSet<Task> Tasks { get; set; }
     public DbSet<Attachment> Attachments { get; set; }
+    public DbSet<Comment> Comments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         
         // Configure the inheritance hierarchy for AttachableEntity
-        modelBuilder.Entity<AttachableEntity<long>>()
+        modelBuilder.Entity<AttachableEntity>()
             .UseTphMappingStrategy();
         
         modelBuilder.Entity<AccessRole>()
@@ -93,4 +95,4 @@ public class PmaContext : DbContext
             .HasIndex(p => p.Name)
             .IsUnique();
     }
-}g
+}
