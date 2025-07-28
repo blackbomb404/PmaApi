@@ -12,7 +12,6 @@ public class Project : AttachableEntity<long>
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
     public ProjectStatus Status { get; set; }
-    public ICollection<UserProject> UserProjects { get; set; } = new List<UserProject>();
     public ICollection<User> Members { get; set; } = new List<User>();
     public ICollection<Task> Tasks { get; set; } = new List<Task>();
 }

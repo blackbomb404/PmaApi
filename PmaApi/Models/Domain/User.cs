@@ -17,10 +17,12 @@ public class User : BaseEntity<long>
     [StringLength(256)]
     public string? PhotoUrl { get; set; }
     
-    public long RoleId { get; set; }
-    public Role Role { get; set; }
+    public long JobRoleId { get; set; }
+    public JobRole JobRole { get; set; }
     
-    public ICollection<UserProject> UserProjects = new List<UserProject>();
+    public long RoleId { get; set; }
+    public AccessRole AccessRole { get; set; }
+    
     public ICollection<Project> Projects = new List<Project>();
     
     public ICollection<Task> Tasks = new List<Task>();

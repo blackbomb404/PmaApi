@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PmaApi.Models.Domain;
 
-public class Role : BaseEntity<long>
+public class AccessRole : BaseEntity<long>
 {
     [StringLength(30)]
     public required string Name { get; set; }

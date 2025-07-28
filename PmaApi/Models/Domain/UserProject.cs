@@ -8,5 +8,5 @@ public class UserProject
     public User User { get; init; }
     public long ProjectId { get; init; }
     public Project Project { get; init; }
-    public required Role RoleOnProject { get; set; }
+    public required AccessRole AccessRoleOnProject { get; set; }
 }
