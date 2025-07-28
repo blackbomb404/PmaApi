@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PmaApi.Models.Domain;
 
-public  class BaseEntity<T>
+public  class BaseEntity
 {
-    public T Id { get; init; }
+    public long Id { get; init; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public long CreatedBy { get; set; }
     public DateTime? UpdatedAt { get; set; }

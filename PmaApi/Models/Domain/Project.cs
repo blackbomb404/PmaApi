@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PmaApi.Models.Domain;
 
-public class Project : AttachableEntity<long>
+public class Project : AttachableEntity
 {
     [StringLength(30)]
     public required string Name { get; set; }

@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PmaApi.Models.Domain;
 
-public class Attachment : BaseEntity<long>
+public class Attachment : BaseEntity
 {
     public long AttachableEntityId { get; set; }
-    public AttachableEntity<long> AttachableEntity { get; set; }
+    public AttachableEntity AttachableEntity { get; set; }
     public long? UserId { get; set; }
     public User? User { get; set; }
     [StringLength(255)]

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PmaApi.Models.Domain;
 
-public class Comment : BaseEntity<long>
+public class Comment : BaseEntity
 {
     [StringLength(100)]
     public required string Content { get; set; }
