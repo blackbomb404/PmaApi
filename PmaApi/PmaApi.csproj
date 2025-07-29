@@ -28,8 +28,4 @@
       <Folder Include="Services\" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Models\Domain\UserProject.cs" />
-    </ItemGroup>
-
 </Project>
