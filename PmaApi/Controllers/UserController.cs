@@ -6,57 +6,87 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Pma.Context;
+using Pma.Models.DTOs.User;
 using PmaApi.Models.Domain;
 
 namespace PmaApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UserController(PmaContext context) : ControllerBase
     {
-        private readonly PmaContext _context;
-
-        public UserController(PmaContext context)
-        {
-            _context = context;
-        }
-
         // GET: api/User
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserOutputDto>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            return await context.Users
+                .Select(user => new UserOutputDto
+                {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    PhoneNumber = user.PhoneNumber,
+                    Email = user.Email,
+                    PhotoUrl = user.PhotoUrl,
+                    JobRoleName = user.JobRole.Name,
+                    AccessRoleName = user.AccessRole.Name
+                })
+                .ToListAsync();
         }
 
         // GET: api/User/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(long id)
+        public async Task<ActionResult<UserOutputDto>> GetUser(long id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await context.Users
+                .Include(u => u.JobRole)
+                .Include(u => u.AccessRole)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (user == null)
+            if (user is null)
             {
                 return NotFound();
             }
 
-            return user;
+            var userOutputDto = new UserOutputDto
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                Email = user.Email,
+                PhotoUrl = user.PhotoUrl,
+                JobRoleName = user.JobRole.Name,
+                AccessRoleName = user.AccessRole.Name
+            };
+            
+            return userOutputDto;
         }
 
         // PUT: api/User/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(long id, User user)
+        public async Task<IActionResult> PutUser(long id, UserUpdateDto userUpdateDto)
         {
-            if (id != user.Id)
+            var user = await context.Users.FindAsync(id);
+            if (user is null)
             {
-                return BadRequest();
+                return NotFound();
             }
-
-            _context.Entry(user).State = EntityState.Modified;
+            
+            // manual mapping
+            user.FirstName = userUpdateDto.FirstName;
+            user.LastName = userUpdateDto.LastName;
+            user.PhoneNumber = userUpdateDto.PhoneNumber;
+            user.Email = userUpdateDto.Email;
+            user.PhotoUrl = userUpdateDto.PhotoUrl;
+            user.JobRoleId = userUpdateDto.JobRoleId;
+            user.AccessRoleId = userUpdateDto.AccessRoleId;
+            // context.Entry(userUpdateDto).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -64,10 +94,7 @@ namespace PmaApi.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return NoContent();
@@ -76,33 +103,42 @@ namespace PmaApi.Controllers
         // POST: api/User
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<User>> PostUser(UserCreateDto userCreateDto)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            var userEntity = new User
+            {
+                FirstName = userCreateDto.FirstName,
+                LastName = userCreateDto.LastName,
+                PhoneNumber = userCreateDto.PhoneNumber,
+                Email = userCreateDto.Email,
+                PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(userCreateDto.Password),
+                JobRoleId = userCreateDto.JobRoleId,
+                AccessRoleId = userCreateDto.AccessRoleId
+            };
+            context.Users.Add(userEntity);
+            await context.SaveChangesAsync();
+            
+            return CreatedAtAction(nameof(GetUser), new { id = userEntity.Id }, userEntity);
         }
 
         // DELETE: api/User/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(long id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            var user = await context.Users.FindAsync(id);
+            if (user is null)
             {
                 return NotFound();
             }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            context.Users.Remove(user);
+            await context.SaveChangesAsync();
 
             return NoContent();
         }
 
         private bool UserExists(long id)
         {
-            return _context.Users.Any(e => e.Id == id);
+            return context.Users.Any(e => e.Id == id);
         }
     }
 }
