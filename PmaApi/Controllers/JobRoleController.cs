@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Pma.Context;
+using Pma.Models.DTOs.JobRole;
 using PmaApi.Models.Domain;
 
 namespace PmaApi.Controllers
@@ -16,36 +17,38 @@ namespace PmaApi.Controllers
     {
         // GET: api/JobRole
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobRole>>> GetJobRoles()
+        public async Task<ActionResult<IEnumerable<JobRoleOutputDto>>> GetJobRoles()
         {
-            return await context.JobRoles.ToListAsync();
+            return await context.JobRoles
+                .Select(role => new JobRoleOutputDto(role.Id, role.Name))
+                .ToListAsync();
         }
 
         // GET: api/JobRole/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<JobRole>> GetJobRole(long id)
+        public async Task<ActionResult<JobRoleOutputDto>> GetJobRole(long id)
         {
             var jobRole = await context.JobRoles.FindAsync(id);
 
-            if (jobRole == null)
+            if (jobRole is null)
             {
                 return NotFound();
             }
 
-            return jobRole;
+            return new JobRoleOutputDto(jobRole.Id, jobRole.Name);
         }
 
         // PUT: api/JobRole/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutJobRole(long id, JobRole jobRole)
+        public async Task<IActionResult> PutJobRole(long id, JobRoleInputDto jobRoleInputDto)
         {
-            if (id != jobRole.Id)
+            if (id != jobRoleInputDto.Id)
             {
                 return BadRequest();
             }
 
-            context.Entry(jobRole).State = EntityState.Modified;
+            context.Entry(jobRoleInputDto).State = EntityState.Modified;
 
             try
             {
