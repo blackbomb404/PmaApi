@@ -18,7 +18,7 @@ public class User : BaseEntity
     public string? PasswordHash { get; set; }
     [StringLength(256)]
     public string? PhotoUrl { get; set; }
-    public DateTime LastLoginAt { get; set; }
+    public DateTime? LastLoginAt { get; set; }
     public long JobRoleId { get; set; }
     public JobRole JobRole { get; set; }
     

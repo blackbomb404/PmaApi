@@ -19,15 +19,30 @@ public class PmaContext(DbContextOptions<PmaContext> options) : DbContext(option
     {
         base.OnModelCreating(modelBuilder);
         
-        // Configure the inheritance hierarchy for AttachableEntity
+        // Configuring the inheritance hierarchy for AttachableEntity
         modelBuilder.Entity<AttachableEntity>()
             .UseTphMappingStrategy();
         
+        // Configuring table and column names
         modelBuilder.Entity<AccessRole>()
             .ToTable("access_roles");
         modelBuilder.Entity<JobRole>()
             .ToTable("job_roles");
 
+        modelBuilder.Entity<AttachableEntity>()
+            .Property(ae => ae.CreatedAt)
+            .HasColumnName("created_at");
+        modelBuilder.Entity<AttachableEntity>()
+            .Property(ae => ae.CreatedBy)
+            .HasColumnName("created_by");
+        modelBuilder.Entity<AttachableEntity>()
+            .Property(ae => ae.UpdatedAt)
+            .HasColumnName("updated_at");
+        modelBuilder.Entity<AttachableEntity>()
+            .Property(ae => ae.UpdatedBy)
+            .HasColumnName("updated_by");
+
+        // Configuring relationships
         modelBuilder.Entity<User>()
             .HasMany(u => u.Projects)
             .WithMany(p => p.Members)
@@ -84,7 +99,7 @@ public class PmaContext(DbContextOptions<PmaContext> options) : DbContext(option
             .IsRequired(false)
             .OnDelete(DeleteBehavior.SetNull);
         
-        // Add unique contraints and others (if needed)
+        // Adding constraints
         modelBuilder.Entity<AccessRole>()
             .HasIndex(r => r.Name)
             .IsUnique();
