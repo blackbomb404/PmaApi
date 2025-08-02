@@ -20,7 +20,7 @@ namespace PmaApi.Controllers
         public async Task<ActionResult<IEnumerable<JobRoleOutputDto>>> GetJobRoles()
         {
             return await context.JobRoles
-                .Select(role => new JobRoleOutputDto(role.Id, role.Name))
+                .Select(jobRole => new JobRoleOutputDto(jobRole.Id, jobRole.Name, jobRole.Description))
                 .ToListAsync();
         }
 
@@ -35,7 +35,7 @@ namespace PmaApi.Controllers
                 return NotFound();
             }
 
-            return new JobRoleOutputDto(jobRole.Id, jobRole.Name);
+            return new JobRoleOutputDto(jobRole.Id, jobRole.Name, jobRole.Description);
         }
 
         // PUT: api/JobRole/5
@@ -48,7 +48,14 @@ namespace PmaApi.Controllers
                 return BadRequest();
             }
 
-            context.Entry(jobRoleInputDto).State = EntityState.Modified;
+            var  jobRole = await context.JobRoles.FindAsync(id);
+            if (jobRole is null)
+            {
+                return NotFound();
+            }
+            jobRole.Name = jobRoleInputDto.Name;
+            jobRole.Description = jobRoleInputDto.Description;
+            // context.Entry(jobRoleInputDto).State = EntityState.Modified;
 
             try
             {
@@ -69,12 +76,15 @@ namespace PmaApi.Controllers
         // POST: api/JobRole
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<JobRole>> PostJobRole(JobRole jobRole)
+        public async Task<ActionResult<JobRole>> PostJobRole(JobRoleInputDto jobRoleInputDto)
         {
+            var jobRole = new JobRole { Name = jobRoleInputDto.Name };
             context.JobRoles.Add(jobRole);
             await context.SaveChangesAsync();
+            
+            var jobRoleOutputDto = new JobRoleOutputDto(jobRole.Id, jobRole.Name, jobRole.Description);
 
-            return CreatedAtAction(nameof(GetJobRole), new { id = jobRole.Id }, jobRole);
+            return CreatedAtAction(nameof(GetJobRole), new { id = jobRole.Id }, jobRoleOutputDto);
         }
 
         // DELETE: api/JobRole/5

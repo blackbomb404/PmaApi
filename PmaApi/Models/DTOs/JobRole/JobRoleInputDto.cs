@@ -1,3 +1,3 @@
 namespace Pma.Models.DTOs.JobRole;
 
-public record JobRoleInputDto(long? Id, string Name);
+public record JobRoleInputDto(string Name, string? Description);
