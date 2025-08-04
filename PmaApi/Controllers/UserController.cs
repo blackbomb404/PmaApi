@@ -118,7 +118,30 @@ namespace PmaApi.Controllers
             context.Users.Add(userEntity);
             await context.SaveChangesAsync();
             
-            return CreatedAtAction(nameof(GetUser), new { id = userEntity.Id }, userEntity);
+            var createdUser = await context.Users
+                .AsNoTracking()
+                .Include(u => u.JobRole)      // Eagerly load the JobRole entity
+                .Include(u => u.AccessRole)   // Eagerly load the AccessRole entity
+                .FirstOrDefaultAsync(u => u.Id == userEntity.Id);
+            
+            if (createdUser is null)
+            {
+                return NotFound(); // Or some other appropriate error response
+            }
+
+            var userOutputDto = new UserOutputDto
+            {
+                Id = createdUser.Id,
+                FirstName = createdUser.FirstName,
+                LastName = createdUser.LastName,
+                PhoneNumber = createdUser.PhoneNumber,
+                Email = createdUser.Email,
+                PhotoUrl = createdUser.PhotoUrl,
+                JobRoleName = createdUser.JobRole.Name,
+                AccessRoleName = createdUser.AccessRole.Name
+            };
+            
+            return CreatedAtAction(nameof(GetUser), new { id = userEntity.Id }, userOutputDto);
         }
 
         // DELETE: api/User/5

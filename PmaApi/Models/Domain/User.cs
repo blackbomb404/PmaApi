@@ -25,7 +25,9 @@ public class User : BaseEntity
     public long AccessRoleId { get; set; }
     public AccessRole AccessRole { get; set; }
     
+    public IEnumerable<UserProject> UserProjects = new List<UserProject>();
     public ICollection<Project> Projects = new List<Project>();
     
+    public ICollection<UserTask> UserTasks = new List<UserTask>();
     public ICollection<Task> Tasks = new List<Task>();
 }

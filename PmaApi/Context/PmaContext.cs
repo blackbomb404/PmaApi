@@ -19,11 +19,11 @@ public class PmaContext(DbContextOptions<PmaContext> options) : DbContext(option
     {
         base.OnModelCreating(modelBuilder);
         
-        // Configuring the inheritance hierarchy for AttachableEntity
+        // 1. Configuring the hierarchy mapping strategy
         modelBuilder.Entity<AttachableEntity>()
             .UseTphMappingStrategy();
         
-        // Configuring table and column names
+        // 2. Configuring table and column names
         modelBuilder.Entity<AccessRole>()
             .ToTable("access_roles");
         modelBuilder.Entity<JobRole>()
@@ -46,18 +46,16 @@ public class PmaContext(DbContextOptions<PmaContext> options) : DbContext(option
         modelBuilder.Entity<User>()
             .HasMany(u => u.Projects)
             .WithMany(p => p.Members)
-            .UsingEntity(
-                "user_projects",
-                r => r.HasOne(typeof(Project)).WithMany().HasForeignKey("project_id"),
-                l => l.HasOne(typeof(User)).WithMany().HasForeignKey("user_id")
+            .UsingEntity<UserProject>(
+                r => r.HasOne<Project>().WithMany(p => p.UserProjects).HasForeignKey(up => up.ProjectId),
+                l => l.HasOne<User>().WithMany(u => u.UserProjects).HasForeignKey(up => up.UserId)
             );
         modelBuilder.Entity<User>()
             .HasMany(u => u.Tasks)
             .WithMany(t => t.Members)
-            .UsingEntity(
-                "user_tasks",
-                r => r.HasOne(typeof(Task)).WithMany().HasForeignKey("task_id"),
-                l => l.HasOne(typeof(User)).WithMany().HasForeignKey("user_id")
+            .UsingEntity<UserTask>(
+                r => r.HasOne<Task>().WithMany(t => t.UserTasks).HasForeignKey(ut => ut.TaskId),
+                l => l.HasOne<User>().WithMany(u => u.UserTasks).HasForeignKey(ut => ut.UserId)
                 );
         modelBuilder.Entity<User>()
             .HasOne(u => u.JobRole)
