@@ -9,7 +9,6 @@ public record TaskCreateDto
     public DateOnly? StartDate { get; init; }
     public DateOnly? EndDate { get; init; }
     public Priority Priority { get; init; }
-    public int Order { get; init; }
     public long ProjectId { get; init; }
-    public HashSet<long> MemberIds = new();
+    public HashSet<long> MemberIds { get; init; } = new();
 }

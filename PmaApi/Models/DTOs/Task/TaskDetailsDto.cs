@@ -14,5 +14,5 @@ public record TaskDetailsDto
     public TaskStatus Status { get; init; }
     public Priority Priority { get; init; }
     public long ProjectId { get; init; }
-    public IEnumerable<UserOverviewDto> Members = new List<UserOverviewDto>();
+    public IEnumerable<UserOverviewDto> Members { get; init; } = new List<UserOverviewDto>();
 }

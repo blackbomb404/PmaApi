@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Pma.Context;
 using Pma.Models.DTOs.User;
 using PmaApi.Models.Domain;
+using PmaApi.Models.DTOs;
 
 namespace PmaApi.Controllers
 {
@@ -17,21 +18,33 @@ namespace PmaApi.Controllers
     {
         // GET: api/User
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserOutputDto>>> GetUsers()
+        public async Task<ActionResult<PagedResources<UserOutputDto>>> GetUsers([FromQuery] QueryParameters queryParameters)
         {
-            return await context.Users
-                .Select(user => new UserOutputDto
+            return new PagedResources<UserOutputDto>
+            {
+                Items = await context.Users
+                    .AsNoTracking()
+                    .Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
+                    .Take(queryParameters.PageSize)
+                    .Select(user => new UserOutputDto
+                    {
+                        Id = user.Id,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        PhoneNumber = user.PhoneNumber,
+                        Email = user.Email,
+                        PhotoUrl = user.PhotoUrl,
+                        JobRoleName = user.JobRole.Name,
+                        AccessRoleName = user.AccessRole.Name
+                    })
+                    .ToListAsync(),
+                Pagination = new Pagination
                 {
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    PhoneNumber = user.PhoneNumber,
-                    Email = user.Email,
-                    PhotoUrl = user.PhotoUrl,
-                    JobRoleName = user.JobRole.Name,
-                    AccessRoleName = user.AccessRole.Name
-                })
-                .ToListAsync();
+                    PageNumber = queryParameters.PageNumber,
+                    PageSize = queryParameters.PageSize,
+                    TotalCount = (short)await context.Users.CountAsync()
+                }
+            };
         }
 
         // GET: api/User/5

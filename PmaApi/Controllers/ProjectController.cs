@@ -11,6 +11,7 @@ using Pma.Models.DTOs.User;
 using PmaApi.Models.Domain;
 using PmaApi.Models.DTOs;
 using PmaApi.Models.DTOs.Project;
+using PmaApi.Models.DTOs.Task;
 
 namespace PmaApi.Controllers
 {
@@ -58,7 +59,24 @@ namespace PmaApi.Controllers
                         LastName = m.LastName,
                         PhotoUrl = m.PhotoUrl
                     }),
-                    Tasks = p.Tasks
+                    Tasks = p.Tasks.Select(t => new TaskListDto
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                        StartDate = t.StartDate,
+                        EndDate = t.EndDate,
+                        Status = t.Status,
+                        Priority = t.Priority,
+                        Order = t.Order,
+                        ProjectId = t.ProjectId,
+                        Members = t.Members.Select(m => new UserOverviewDto
+                        {
+                            Id = m.Id,
+                            FirstName = m.FirstName,
+                            LastName = m.LastName,
+                            PhotoUrl = m.PhotoUrl
+                        })
+                    })
                 })
                 .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -108,6 +126,62 @@ namespace PmaApi.Controllers
                 throw;
             }
 
+            return NoContent();
+        }
+        
+        [HttpPost("{id}/assign-to-members")]
+        public async Task<IActionResult> AssignProjectToMembers(long id, ProjectAssignmentInputDto projectAssignmentInputDto)
+        {
+            // 1. Find the project and INCLUDE its current members
+            var project = await context.Projects
+                .Include(p => p.UserProjects)
+                .SingleOrDefaultAsync(p => p.Id == id);
+    
+            if (project is null)
+            {
+                return NotFound();
+            }
+    
+            // 2. Get the current and new member IDs
+            var currentMemberIds = project.UserProjects.Select(up => up.UserId).ToList();
+            var newMemberIds = projectAssignmentInputDto.MemberIds;
+    
+            // 3. Find members to remove
+            var membersToRemove = project.UserProjects
+                .Where(up => !newMemberIds.Contains(up.UserId))
+                .ToList();
+    
+            // 4. Find member IDs to add
+            var memberIdsToAdd = newMemberIds
+                .Where(newId => !currentMemberIds.Contains(newId))
+                .ToList();
+    
+            // 5. Add and remove relationships
+            // Remove old relationships
+            foreach (var userProject in membersToRemove)
+            {
+                project.UserProjects.Remove(userProject);
+            }
+    
+            // Add new relationships
+            foreach (var memberId in memberIdsToAdd)
+            {
+                project.UserProjects.Add(new UserProject { UserId = memberId, ProjectId = project.Id });
+            }
+    
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ProjectExists(id))
+                {
+                    return NotFound();
+                }
+                throw;
+            }
+    
             return NoContent();
         }
 
@@ -183,6 +257,6 @@ namespace PmaApi.Controllers
                         PhotoUrl = m.PhotoUrl
                     })
                 });
-        } 
+        }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Pma.Context;
 using Pma.Models.DTOs.JobRole;
 using PmaApi.Models.Domain;
+using PmaApi.Models.DTOs;
 
 namespace PmaApi.Controllers
 {
@@ -17,11 +18,23 @@ namespace PmaApi.Controllers
     {
         // GET: api/JobRole
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobRoleOutputDto>>> GetJobRoles()
+        public async Task<ActionResult<PagedResources<JobRoleOutputDto>>> GetJobRoles([FromQuery] QueryParameters queryParameters)
         {
-            return await context.JobRoles
-                .Select(jobRole => new JobRoleOutputDto(jobRole.Id, jobRole.Name, jobRole.Description))
-                .ToListAsync();
+            return new PagedResources<JobRoleOutputDto>
+            {
+                Items = await context.JobRoles
+                    .AsNoTracking()
+                    .Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
+                    .Take(queryParameters.PageSize)
+                    .Select(jobRole => new JobRoleOutputDto(jobRole.Id, jobRole.Name, jobRole.Description))
+                    .ToListAsync(),
+                Pagination = new Pagination
+                {
+                    PageNumber = queryParameters.PageNumber,
+                    PageSize = queryParameters.PageSize,
+                    TotalCount = (short)await context.JobRoles.CountAsync()
+                }
+            };
         }
 
         // GET: api/JobRole/5

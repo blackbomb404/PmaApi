@@ -2,44 +2,55 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Pma.Context;
 using Pma.Models.DTOs;
+using PmaApi.Models.Domain;
 
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly IConfiguration _configuration;
     private readonly string _jwtKey;
     private readonly string _jwtIssuer;
     private readonly string _jwtAudience;
+    private PmaContext _context;
     
-    public AuthController(IConfiguration configuration)
+    public AuthController(IConfiguration configuration, PmaContext context)
     {
-        _configuration = configuration;
-        _jwtKey = _configuration["Jwt:Key"]!;
-        _jwtIssuer = _configuration["Jwt:Issuer"]!;
-        _jwtAudience = _configuration["Jwt:Audience"]!;
+        _jwtKey = configuration["Jwt:Key"]!;
+        _jwtIssuer = configuration["Jwt:Issuer"]!;
+        _jwtAudience = configuration["Jwt:Audience"]!;
+        _context = context;
     }
     
     [HttpPost("login")]
-    public IActionResult Login([FromBody] UserLogin user)
+    public async Task<IActionResult> Login([FromBody] UserLogin userLogin)
     {
-        if (user.Username == "admin" && user.Password == "password")
+        var user = await _context.Users
+            .AsNoTracking()
+            .Include(u => u.AccessRole)
+            .FirstOrDefaultAsync(u => u.Email == userLogin.Email);
+        if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(userLogin.Password, user.PasswordHash))
         {
-            var token = GenerateJwt(user.Username);
-            return Ok(new { token });
+            return Unauthorized(new { message = "Email or password is incorrect." });
         }
-        return Unauthorized();
+        var token = GenerateJwt(user);
+        return Ok(new { token });
     }
 
-    private string GenerateJwt(string username)
+    private string GenerateJwt(User user)
     {
         // setting the data that will be part of the payload
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, username),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Name, $"{user.FirstName} {user.LastName}"),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim("role", user.AccessRole.Name),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
         };
 
         // key -> SSK -> SC -> JST -> JSTH.writeToken(token)
