@@ -8,7 +8,7 @@ public class PmaContext(DbContextOptions<PmaContext> options) : DbContext(option
 {
     public DbSet<User> Users { get; set; }
     public DbSet<JobRole> JobRoles { get; set; }
-    public DbSet<AccessRole> Roles { get; set; }
+    public DbSet<AccessRole> AccessRoles { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<Project> Projects { get; set; }
     public DbSet<Task> Tasks { get; set; }

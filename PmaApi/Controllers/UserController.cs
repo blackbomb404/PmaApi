@@ -118,7 +118,31 @@ namespace PmaApi.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(UserCreateDto userCreateDto)
         {
-            var userEntity = new User
+            var emailExists = await context.Users
+                .AsNoTracking()
+                .AnyAsync(u => u.Email == userCreateDto.Email);
+            if (emailExists)
+            {
+                return BadRequest(new { message = "The email you provided is already in use." });
+            }
+            
+            var jobRoleName = await context.JobRoles
+                .AsNoTracking()
+                .Where(jr => jr.Id == userCreateDto.JobRoleId)
+                .Select(jr => jr.Name)
+                .FirstOrDefaultAsync();
+
+            var accessRoleName = await context.AccessRoles
+                .AsNoTracking()
+                .Where(ar => ar.Id == userCreateDto.AccessRoleId)
+                .Select(ar => ar.Name)
+                .FirstOrDefaultAsync();
+            
+            if (jobRoleName is null || accessRoleName is null)
+            {
+                return BadRequest(new { message = "Invalid JobRole or AccessRole ID." });
+            }
+            var user = new User
             {
                 FirstName = userCreateDto.FirstName,
                 LastName = userCreateDto.LastName,
@@ -128,33 +152,22 @@ namespace PmaApi.Controllers
                 JobRoleId = userCreateDto.JobRoleId,
                 AccessRoleId = userCreateDto.AccessRoleId
             };
-            context.Users.Add(userEntity);
+            context.Users.Add(user);
             await context.SaveChangesAsync();
             
-            var createdUser = await context.Users
-                .AsNoTracking()
-                .Include(u => u.JobRole)      // Eagerly load the JobRole entity
-                .Include(u => u.AccessRole)   // Eagerly load the AccessRole entity
-                .FirstOrDefaultAsync(u => u.Id == userEntity.Id);
-            
-            if (createdUser is null)
-            {
-                return NotFound(); // Or some other appropriate error response
-            }
-
             var userOutputDto = new UserOutputDto
             {
-                Id = createdUser.Id,
-                FirstName = createdUser.FirstName,
-                LastName = createdUser.LastName,
-                PhoneNumber = createdUser.PhoneNumber,
-                Email = createdUser.Email,
-                PhotoUrl = createdUser.PhotoUrl,
-                JobRoleName = createdUser.JobRole.Name,
-                AccessRoleName = createdUser.AccessRole.Name
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                Email = user.Email,
+                PhotoUrl = user.PhotoUrl,
+                JobRoleName = jobRoleName,
+                AccessRoleName = accessRoleName
             };
             
-            return CreatedAtAction(nameof(GetUser), new { id = userEntity.Id }, userOutputDto);
+            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, userOutputDto);
         }
 
         // DELETE: api/User/5
