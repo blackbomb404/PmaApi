@@ -107,5 +107,8 @@ public class PmaContext(DbContextOptions<PmaContext> options) : DbContext(option
         modelBuilder.Entity<Permission>()
             .HasIndex(p => p.Name)
             .IsUnique();
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
     }
 }
