@@ -12,11 +12,11 @@ namespace PmaApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AttachmentController : ControllerBase
+    public class AttachmentsController : ControllerBase
     {
         private readonly PmaContext _context;
 
-        public AttachmentController(PmaContext context)
+        public AttachmentsController(PmaContext context)
         {
             _context = context;
         }

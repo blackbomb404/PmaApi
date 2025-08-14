@@ -14,7 +14,7 @@ namespace PmaApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class JobRoleController(PmaContext context) : ControllerBase
+    public class JobRolesController(PmaContext context) : ControllerBase
     {
         // GET: api/JobRole
         [HttpGet]

@@ -17,7 +17,7 @@ namespace PmaApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProjectController(PmaContext context) : ControllerBase
+    public class ProjectsController(PmaContext context) : ControllerBase
     {
         // GET: api/Project
         [HttpGet]

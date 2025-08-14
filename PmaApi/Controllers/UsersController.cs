@@ -14,7 +14,7 @@ namespace PmaApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController(PmaContext context) : ControllerBase
+    public class UsersController(PmaContext context) : ControllerBase
     {
         // GET: api/User
         [HttpGet]
