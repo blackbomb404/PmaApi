@@ -5,6 +5,7 @@ namespace PmaApi.Models.Domain;
 
 public class Task : AttachableEntity
 {
+    public TaskType Type { get; set; } = TaskType.Task;
     [StringLength(50)]
     public required string Name { get; set; }
     [StringLength(100)]

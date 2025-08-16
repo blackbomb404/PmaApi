@@ -29,6 +29,9 @@ public class PmaContext(DbContextOptions<PmaContext> options) : DbContext(option
         modelBuilder.Entity<JobRole>()
             .ToTable("job_roles");
 
+        modelBuilder.Entity<Task>()
+            .Property(t => t.Type)
+            .HasColumnName("task_type");
         modelBuilder.Entity<AttachableEntity>()
             .Property(ae => ae.CreatedAt)
             .HasColumnName("created_at");
